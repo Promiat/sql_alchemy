@@ -1,8 +1,7 @@
 FROM python:3.6
-WORKDIR /app
-COPY . /app/
-
-RUN pip3 install --requirement ./requirements.txt
 EXPOSE 5000
-ENTRYPOINT FLASK_APP=app.py flask run --host=0.0.0.0
-CMD ["run", "--host", "0.0.0.0"]
+WORKDIR /app
+COPY requirements.txt /app
+RUN pip install -r requirements.txt
+COPY app.py /app
+CMD python app.py

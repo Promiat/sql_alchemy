@@ -1,4 +1,5 @@
-virtualenv
 Flask
 Flask-SQLAlchemy
 SQLAlchemy
+PyMySQL
+pytest
