@@ -41,15 +41,19 @@ logging.info('\n - - - ✅ [Tables] Payments | Data Mapping OK - - - \n')
 
 def print_table() -> List:
     tab=[]
-    logging.info(' - - - ✅ Tables into database - - - \n')
+    logging.info(' - - - ✅ Tables into database toto - - - \n')
     for t in metadata.sorted_tables:
-        print("\t\t - {}".format(t.name))
+        print("\t\t toto - {}".format(t.name))
         tab.append(t.name)
     return tab 
 
 #create session and perform request 
 from sqlalchemy.orm import sessionmaker
 from datetime import date
+import sys
+from flask import jsonify
+from sqlalchemy.sql import func
+import logging
 Session = sessionmaker()
 # associate session with our db 
 Session.configure(bind=engine)
@@ -58,34 +62,38 @@ session = Session()
 def sample_query() -> List:    
     #query db
     q=[]
-    prilogging.info('\n### ✅ All Payments with date > 01 June 2005:')
-    pays = session.query(payments)\
-        .filter_by(paymentDate > date(2005,6,1))\
-        .all()
+    pays = session.query(payments).filter_by(paymentDate > date(2005,6,1)).all()
     for pay in pays:
         q.append('{pay.customerNumber} payed {pay.amount} on {pay.paymentDate}')
     print('')
     return q 
-def new_query() -> List:
-    q = []
-    payments = session.query(payments)\
-        .filter_by(amount > 100000)\
-         .all()
-    for pay in payments: 
-        q.append('{pay.customerNumber} payed {pay.amount}')     
-    return q   
+
 @app.route('/')
 def index() -> str:
     return ' - - - ✅ MySQL Database `classicmodels` connection ok - - - '
 
 @app.route('/tables')
 def tables() -> str:
-    return json.dumps({'Tables ': print_table()})
+    return json.dumps({'Tables toto': print_table()})
 
-@app.route('/query')
-def new_query() -> str:
-    return json.dumps({'Sample Query ': new_query()})
+@app.route('/totalOctobre')
+def total_octobre():
+    session = Session()
+    for instance in session.query(func.sum(payments.amount)).filter(payments.paymentDate == '2004-10-28'):
+        return jsonify({'total': str(instance[0])})
+@app.route('/100k')
+def centk():
+    session = Session()
+    result=[]
+    for pay in session.query(payments).filter(payments.amount > 100000):
+        result.append({"amount": str(pay.amount), "checkNumber": pay.checkNumber})
+    return jsonify(result)
+@app.route('/min')
+def min_amount():
+    session = Session()
+    result =  session.query(func.min(payments.amount))
+    return jsonify({'min': str(result[0])})
 
-
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
